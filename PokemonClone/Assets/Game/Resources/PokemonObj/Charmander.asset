@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19efc8eb50044614fb05cf552d09e9a6, type: 3}
+  m_Name: Charmander
+  m_EditorClassIdentifier: 
+  name: 
+  description: Fire tail pokemon
+  frontSprite: {fileID: 21300000, guid: 757ac0a5e9e1f1b42bbb71bf1285a13f, type: 3}
+  backSprite: {fileID: 21300000, guid: ae6838ded5b4cf94d8e2de1315dc95ef, type: 3}
+  type1: 2
+  type2: 0
+  maxHP: 39
+  attack: 52
+  defense: 43
+  spAttack: 60
+  spDefense: 50
+  speed: 65
+  learnableMoves:
+  - moveBase: {fileID: 11400000, guid: 48eec02265ded6b4d9e60f1afcb79431, type: 2}
+    level: 1
+  - moveBase: {fileID: 11400000, guid: baa3b75e9839b7b4cb4fad6edd47be77, type: 2}
+    level: 4

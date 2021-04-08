@@ -52,4 +52,24 @@ public class Pokemon
     {
         get { return Mathf.FloorToInt((basePokemon.Attack * level) / 100f) + 5; }
     }
+    public bool TakeDamage(Move move, Pokemon attacker)
+    {
+        float modifiers = Random.Range(0.85f, 1f);
+        float a = (2 * attacker.level + 10) / 250f;
+        float d = a * move.Base.Power * ((float)attacker.Attack / Defense) + 2;
+        int damage = Mathf.FloorToInt(d * modifiers);
+
+        Hp -= damage;
+        if(Hp <= 0)
+        {
+            Hp = 0;
+            return true;
+        }
+        return false;
+    }
+    public Move SelectEnemyMove()
+    {
+        int r = Random.Range(0, moves.Count);
+        return moves[r];
+    }
 }

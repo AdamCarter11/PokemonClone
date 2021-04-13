@@ -62,6 +62,7 @@ public class BattleSystem : MonoBehaviour
     {
         state = BattleState.Busy;
         var move = playerUnit.pokemon.moves[currentMove];
+        move.Pp--;
         yield return dialogBox.TypeDialog($"{playerUnit.pokemon.basePokemon.name} used {move.Base.name}");
 
         var damageDetails = enemyUnit.pokemon.TakeDamage(move, playerUnit.pokemon);
@@ -84,6 +85,7 @@ public class BattleSystem : MonoBehaviour
     {
         state = BattleState.EnemyMove;
         var move = enemyUnit.pokemon.SelectEnemyMove();
+        move.Pp--;
         yield return dialogBox.TypeDialog($"{enemyUnit.pokemon.basePokemon.name} used {move.Base.name}");
 
         var damageDetails = playerUnit.pokemon.TakeDamage(move, enemyUnit.pokemon);

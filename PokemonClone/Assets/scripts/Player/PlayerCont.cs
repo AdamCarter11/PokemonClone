@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,6 +11,7 @@ public class PlayerCont : MonoBehaviour
     private Animator animator;
     public LayerMask grassLayer;
     public LayerMask solidObjectTileMap;
+    public event Action OnEncountered;
     void Awake() {
         animator = GetComponent<Animator>();
     }
@@ -21,7 +23,7 @@ public class PlayerCont : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    public void HandleUpdate()
     {
         if (!isMoving)
         {
@@ -68,9 +70,11 @@ public class PlayerCont : MonoBehaviour
     {
         if (Physics2D.OverlapCircle(transform.position, 0.1f, grassLayer) != null)
         {
-            if(Random.Range(1,101) <= 10)   //need to figure out a way to limit it so after 1 battle, you can't get it again for a bit, and also increase the chances if you have been walking in the grass for a while
+            if(UnityEngine.Random.Range(1,101) <= 10)   //need to figure out a way to limit it so after 1 battle, you can't get it again for a bit, and also increase the chances if you have been walking in the grass for a while. we do UnityEngine because we did using System at the top and both unity and system have a random class so we have to specify
             {
-                Debug.Log("battle");
+                animator.SetBool("isMoving", false);
+
+                OnEncountered();
             }
         }
     }

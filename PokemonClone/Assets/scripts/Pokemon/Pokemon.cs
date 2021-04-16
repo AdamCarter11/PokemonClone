@@ -2,17 +2,28 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class Pokemon
 {
-    public PokemonBase basePokemon { get; set; }            //called properties, it allows for us to grab the data from other scripts
-    public int level { get; set; } 
+    [SerializeField] PokemonBase _base;
+    [SerializeField] int level;
+    public PokemonBase basePokemon
+    {
+        get { return _base; }
+    }
+    public int Level
+    {
+        get { return level; }
+    }
+    //public PokemonBase basePokemon { get; set; }            //called properties, it allows for us to grab the data from other scripts
+    //public int level { get; set; } 
     public int Hp { get; set; }
     public List<Move> moves { get; set; }
 
-    public Pokemon(PokemonBase pBase, int pLevel)
+    public void Init()
     {
-        basePokemon = pBase;
-        level = pLevel;
+        //basePokemon = pBase;
+        //level = pLevel;
         Hp = MaxHp;
 
         moves = new List<Move>();

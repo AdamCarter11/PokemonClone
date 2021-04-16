@@ -26,14 +26,19 @@ public class BattleSystem : MonoBehaviour
     int currentAction;  // if 0-fight, if 1-run
     int currentMove;
 
-    public void StartBattle()
+    PokemonParty playerParty;
+    Pokemon wildPokemon;
+
+    public void StartBattle(PokemonParty playerParty, Pokemon wildPokemon)
     {
+        this.playerParty = playerParty;
+        this.wildPokemon = wildPokemon;
         StartCoroutine( SetUpBattle());
     }
     public IEnumerator SetUpBattle()
     {
-        playerUnit.Setup();
-        enemyUnit.Setup();
+        playerUnit.Setup(playerParty.GetHealthyPokemon());
+        enemyUnit.Setup(wildPokemon);
         playerHUD.SetData(playerUnit.pokemon);
         enemyHUD.SetData(enemyUnit.pokemon);
 
@@ -95,7 +100,23 @@ public class BattleSystem : MonoBehaviour
         {
             yield return dialogBox.TypeDialog($"{playerUnit.pokemon.basePokemon.name} Fainted!");
             yield return new WaitForSeconds(2f);
-            OnBattleOver(false);
+            var nextPokemon = playerParty.GetHealthyPokemon();
+            if(nextPokemon != null)
+            {
+                //will need to reset which move is selected for the player in case the enemy attacked first and defeated the current player pokemon
+                playerUnit.Setup(nextPokemon);
+                playerHUD.SetData(nextPokemon);
+
+                dialogBox.SetMoveNames(nextPokemon.moves);
+
+                yield return dialogBox.TypeDialog($"Go: {nextPokemon.basePokemon.name} !");           //waits for this coroutine to finish instead of a set time
+
+                PlayerAction();
+            }
+            else
+            {
+                OnBattleOver(false);
+            }
         }
         else
         {

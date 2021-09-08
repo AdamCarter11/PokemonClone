@@ -19,6 +19,7 @@ public class BattleSystem : MonoBehaviour
     [SerializeField] BattleHUD playerHUD;
     [SerializeField] BattleHUD enemyHUD;
     [SerializeField] BattleDialogueBox dialogBox;
+    [SerializeField] PartyScreen partyScreen;
 
     public event Action<bool> OnBattleOver;
 
@@ -42,6 +43,8 @@ public class BattleSystem : MonoBehaviour
         playerHUD.SetData(playerUnit.pokemon);
         enemyHUD.SetData(enemyUnit.pokemon);
 
+        partyScreen.Init();
+            
         dialogBox.SetMoveNames(playerUnit.pokemon.moves);
 
         yield return dialogBox.TypeDialog($"A wild {enemyUnit.pokemon.basePokemon.name} appeared!");           //waits for this coroutine to finish instead of a set time
@@ -52,8 +55,13 @@ public class BattleSystem : MonoBehaviour
     void PlayerAction()
     {
         state = BattleState.PlayerAction;
-        StartCoroutine(dialogBox.TypeDialog("choose an action"));
+        dialogBox.SetDialog("choose an action");
         dialogBox.EnableActionSelector(true);
+    }
+    void OpenPartyScreen()
+    {
+        partyScreen.SetPartyData(playerParty.Pokemons);
+        partyScreen.gameObject.SetActive(true);
     }
 
     void PlayerMove()
@@ -153,20 +161,23 @@ public class BattleSystem : MonoBehaviour
     }
     void HandleActionSelector()
     {
-        if (Input.GetKeyDown(KeyCode.DownArrow))
+        if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            if (currentAction < 1)
-            {
-                ++currentAction;
-            }
+            ++currentAction;
+        }
+        else if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            --currentAction;
+        }
+        else if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            currentAction += 2;
         }
         else if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            if(currentAction > 0)
-            {
-                --currentAction;
-            }
+            currentAction -= 2;
         }
+        currentAction = Mathf.Clamp(currentAction, 0, 3); //clamps current action between 0 and 3 (4 moves)
         dialogBox.UpdateActionSelection(currentAction);
         if (Input.GetKeyDown(KeyCode.Z))
         {
@@ -177,6 +188,15 @@ public class BattleSystem : MonoBehaviour
             }
             else if(currentAction == 1)
             {
+                //bag
+            }
+            else if (currentAction == 2)
+            {
+                //pokemon select
+                OpenPartyScreen();
+            }
+            else if (currentAction == 3)
+            {
                 //run
             }
         }
@@ -185,32 +205,21 @@ public class BattleSystem : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            if (currentMove < playerUnit.pokemon.moves.Count-1)
-            {
-                ++currentMove;
-            }
+            ++currentMove;
         }
         else if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            if (currentMove > 0)
-            {
-                --currentMove;
-            }
+            --currentMove;
         }
         else if (Input.GetKeyDown(KeyCode.DownArrow))
         {
-            if (currentMove < playerUnit.pokemon.moves.Count-2)
-            {
-                currentMove+=2;
-            }
+            currentMove += 2;
         }
         else if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            if (currentMove > 1)
-            {
-                currentMove-=2;
-            }
+            currentMove -= 2;
         }
+        currentMove = Mathf.Clamp(currentMove, 0, 3); //clamps current action between 0 and 3 (4 moves)
         dialogBox.UpdateMoveSelection(currentMove, playerUnit.pokemon.moves[currentMove]);
 
         if (Input.GetKeyDown(KeyCode.Z))
@@ -218,6 +227,12 @@ public class BattleSystem : MonoBehaviour
             dialogBox.EnableMoveSelector(false);
             dialogBox.EnableDialogText(true);
             StartCoroutine(PerformPlayerMove());
+        }
+        else if (Input.GetKeyDown(KeyCode.X))
+        {
+            dialogBox.EnableMoveSelector(false);
+            dialogBox.EnableDialogText(true);
+            PlayerAction();
         }
     }
 

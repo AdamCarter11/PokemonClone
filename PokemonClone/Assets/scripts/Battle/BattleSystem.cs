@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//used to hold the different states the game can be in
 public enum BattleState
 {
     Start,
@@ -31,12 +32,16 @@ public class BattleSystem : MonoBehaviour
     PokemonParty playerParty;
     Pokemon wildPokemon;
 
+    //sets the variables and triggers the SetUpBattle function
     public void StartBattle(PokemonParty playerParty, Pokemon wildPokemon)
     {
         this.playerParty = playerParty;
         this.wildPokemon = wildPokemon;
         StartCoroutine( SetUpBattle());
     }
+
+    //gets the first healthy pokemon in the players party, gets a random enemy pokemon for that area
+    //initilizes the party screen and displays the players moves
     public IEnumerator SetUpBattle()
     {
         playerUnit.Setup(playerParty.GetHealthyPokemon());
@@ -60,12 +65,15 @@ public class BattleSystem : MonoBehaviour
         OnBattleOver(outcome);
     }
 
+    //displays message and then triggers the actionselector
     void ActionSelection()
     {
         state = BattleState.ActionSelection;
         dialogBox.SetDialog("choose an action");
         dialogBox.EnableActionSelector(true);
     }
+
+    //used to display players party screen to swap pokemon during battle
     void OpenPartyScreen()
     {
         state = BattleState.PartyScreen;
@@ -73,6 +81,7 @@ public class BattleSystem : MonoBehaviour
         partyScreen.gameObject.SetActive(true);
     }
 
+    //displays moves and lets you chose one
     void MoveSelection()
     {
         state = BattleState.MoveSelection;
@@ -80,6 +89,10 @@ public class BattleSystem : MonoBehaviour
         dialogBox.EnableDialogText(false);
         dialogBox.EnableMoveSelector(true);
     }
+
+    //most of the code is done in the RuneMove function
+    //saves which move the user selected and passes it to RunMove
+    //checks if you can keep playing (player isn't out of pokemon)
     IEnumerator PlayerMove()
     {
         state = BattleState.PerformMove;
@@ -92,6 +105,8 @@ public class BattleSystem : MonoBehaviour
             StartCoroutine(EnemyMove());
         }
     }
+
+    //selects an enemy move and passes it to RunMove (like PlayerMove function)
     IEnumerator EnemyMove()
     {
         state = BattleState.PerformMove;
@@ -103,6 +118,9 @@ public class BattleSystem : MonoBehaviour
         }
     }
 
+    //lowers that moves pp and displays what move is being used
+    //updates the targets health and UI
+    //checks if the target pokemon has fainted
     IEnumerator RunMove(BattleUnit sourceUnit, BattleUnit targetUnit, Move move)
     {
         move.Pp--;
@@ -122,6 +140,7 @@ public class BattleSystem : MonoBehaviour
         }
     }
 
+    //Checks to see if the player pokemon fainted and is also out of healthy pokemon
     void CheckForBattleOver(BattleUnit faintedUnit)
     {
         if (faintedUnit.IsPlayerUnit)
@@ -133,7 +152,7 @@ public class BattleSystem : MonoBehaviour
             }
             else
             {
-                BattleOver(false);
+                BattleOver(false);  //player is out of pokemon
             }
         }
         else
@@ -142,6 +161,7 @@ public class BattleSystem : MonoBehaviour
         }
     }
 
+    //Displays crits and type effectivness 
     IEnumerator ShowDamageDetails(DamageDetails damageDetails)
     {
         if(damageDetails.Critical > 1f)
@@ -173,6 +193,10 @@ public class BattleSystem : MonoBehaviour
             HandlePartySelection();
         }
     }
+
+    //the first chunk of if/ifelse/else statements are used for letting the player select an action
+    //we also clamp the action so it can't go out of bounds
+    //based on what is selected, we then open the correct UI screen
     void HandleActionSelector()
     {
         if (Input.GetKeyDown(KeyCode.RightArrow))
@@ -215,6 +239,9 @@ public class BattleSystem : MonoBehaviour
             }
         }
     }
+
+    //almost the same as above, but for picking moves
+    //we also have the option of backing out with the key: X
     void HandleMoveSelection()
     {
         if (Input.GetKeyDown(KeyCode.RightArrow))
@@ -250,6 +277,8 @@ public class BattleSystem : MonoBehaviour
         }
     }
 
+    //similar as the above 2 functions, 
+    //but now we also are checking to see if the player has selected a valid pokemon 
     void HandlePartySelection()
     {
         if (Input.GetKeyDown(KeyCode.RightArrow))
@@ -295,6 +324,11 @@ public class BattleSystem : MonoBehaviour
             ActionSelection();
         }
     }
+
+    //function to control when we swap pokemon
+    //check to see if we still have HP and if so, call the pokemon back
+    //then we setup the next pokemon and swap it in
+    //we end the function by calling the EnemyMove coroutine (as swapping uses the players move)
     IEnumerator SwitchPokemon(Pokemon newPokemon)
     {
         if (playerUnit.pokemon.Hp > 0)

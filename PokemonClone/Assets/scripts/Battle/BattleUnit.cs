@@ -7,6 +7,17 @@ public class BattleUnit : MonoBehaviour
     //[SerializeField] PokemonBase pokemonBase;
     //[SerializeField] int level;
     [SerializeField] bool isPlayerUnit;
+    [SerializeField] BattleHUD hud;
+
+    //so we can access this data in other functions
+    public bool IsPlayerUnit
+    {
+        get { return isPlayerUnit; }
+    }
+    public BattleHUD Hud
+    {
+        get { return hud; }
+    }
     public Pokemon pokemon { get; set; }
 
     public void Setup(Pokemon pokemonUnit)                                                           //the function that generates a pokemon and selects which sprite (based on player or enemy)
@@ -20,5 +31,6 @@ public class BattleUnit : MonoBehaviour
         {
             GetComponent<Image>().sprite = pokemon.basePokemon.FrontSprite;
         }
+        hud.SetData(pokemon);
     }
 }

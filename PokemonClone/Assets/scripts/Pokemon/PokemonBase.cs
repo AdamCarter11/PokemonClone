@@ -118,6 +118,13 @@ public enum PokemonType                             //all the possible types a p
     Steel,
     Fairy
 }
+public enum Stat{
+    Attack,
+    Defense,
+    SpAttack,
+    SpDefense,
+    Speed
+}
 
 public class TypeChart
 {

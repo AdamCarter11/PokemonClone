@@ -54,14 +54,23 @@ public class BattleSystem : MonoBehaviour
         yield return dialogBox.TypeDialog($"A wild {enemyUnit.pokemon.basePokemon.name} appeared!");           //waits for this coroutine to finish instead of a set time
         
 
-        ActionSelection();
+        ChooseFirstTurn();
     }
 
+    void ChooseFirstTurn(){
+        if(playerUnit.pokemon.Speed >= enemyUnit.pokemon.Speed){
+            ActionSelection();
+        }
+        else{
+            StartCoroutine(EnemyMove());
+        }
+    }
     //triggers battle over state depending on who has won
     //needed so that the player/enemy move functions don't run coroutines if battle is over
     void BattleOver(bool outcome)
     {
         state = BattleState.BattleOver;
+        playerParty.Pokemons.ForEach(p=>p.OnBattleOver());
         OnBattleOver(outcome);
     }
 
@@ -128,15 +137,7 @@ public class BattleSystem : MonoBehaviour
         //attack animation: sourceUnit.PlayAttackAnimation();
 
         if(move.Base.Catagory == MoveCatagory.Status){
-            var effects = move.Base.Effects;
-            if(effects.Boosts != null){
-                if(move.Base.Target == MoveTarget.Self){
-                    sourceUnit.pokemon.ApplyBoosts(effects.Boosts);
-                }
-                else{
-                    targetUnit.pokemon.ApplyBoosts(effects.Boosts);
-                }
-            }
+            yield return RunMoveEffects(move, sourceUnit.pokemon, targetUnit.pokemon);
         }
         else{
             var damageDetails = targetUnit.pokemon.TakeDamage(move, sourceUnit.pokemon);
@@ -154,7 +155,25 @@ public class BattleSystem : MonoBehaviour
             CheckForBattleOver(targetUnit);
         }
     }
-
+    IEnumerator RunMoveEffects(Move move, Pokemon source, Pokemon target){
+        var effects = move.Base.Effects;
+        if(effects.Boosts != null){
+            if(move.Base.Target == MoveTarget.Self){
+                source.ApplyBoosts(effects.Boosts);
+            }
+            else{
+                target.ApplyBoosts(effects.Boosts);
+            }
+        }
+        yield return ShowStatusChanges(source);
+        yield return ShowStatusChanges(target);
+    }
+    IEnumerator ShowStatusChanges(Pokemon pokemon){
+        while(pokemon.StatusChanges.Count > 0){
+            var message = pokemon.StatusChanges.Dequeue();
+            yield return dialogBox.TypeDialog(message);
+        }
+    }
     //Checks to see if the player pokemon fainted and is also out of healthy pokemon
     void CheckForBattleOver(BattleUnit faintedUnit)
     {
@@ -346,8 +365,10 @@ public class BattleSystem : MonoBehaviour
     //we end the function by calling the EnemyMove coroutine (as swapping uses the players move)
     IEnumerator SwitchPokemon(Pokemon newPokemon)
     {
+        bool currentPokemonFainted = true;
         if (playerUnit.pokemon.Hp > 0)
         {
+            currentPokemonFainted = false;
             yield return dialogBox.TypeDialog($"Return {playerUnit.pokemon.basePokemon.name}");
             //playerUnit.PlayFaintAnimation();
             yield return new WaitForSeconds(2f);
@@ -358,6 +379,10 @@ public class BattleSystem : MonoBehaviour
         dialogBox.SetMoveNames(newPokemon.moves);
         yield return dialogBox.TypeDialog($"Go: {newPokemon.basePokemon.name} !");
 
-        StartCoroutine(EnemyMove());
+        if(currentPokemonFainted){
+            ChooseFirstTurn();
+        }else{
+            StartCoroutine(EnemyMove());
+        }
     }
 }

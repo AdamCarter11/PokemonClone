@@ -22,7 +22,7 @@ public class Pokemon
     public Dictionary<Stat,int> Stats{get; private set;}
     public Dictionary<Stat,int> StatBoosts{get; private set;} //Stat is the key, int represents the value
     //in the case of the StatBoosts dictionary, the int can be between -6 to +6 (incriments of .5)
-
+    public Queue<string> StatusChanges{ get; private set;} = new Queue<string>();
     public void Init()
     {
         //basePokemon = pBase;
@@ -42,13 +42,7 @@ public class Pokemon
         }
         CalculateStats();
         Hp = MaxHp;
-        StatBoosts = new Dictionary<Stat, int>(){
-            {Stat.Attack, 0},
-            {Stat.SpAttack, 0},
-            {Stat.Defense, 0},
-            {Stat.SpDefense, 0},
-            {Stat.Speed, 0}
-        };
+        ResetStatBoosts();
     }
 
     void CalculateStats(){
@@ -60,6 +54,16 @@ public class Pokemon
         Stats.Add(Stat.Speed, Mathf.FloorToInt((basePokemon.Speed * level) / 100f) + 10);
 
         MaxHp = Mathf.FloorToInt((basePokemon.Attack * level) / 100f) + 10;
+    }
+
+    void ResetStatBoosts(){
+         StatBoosts = new Dictionary<Stat, int>(){
+            {Stat.Attack, 0},
+            {Stat.SpAttack, 0},
+            {Stat.Defense, 0},
+            {Stat.SpDefense, 0},
+            {Stat.Speed, 0}
+        };
     }
 
     int GetStat(Stat stat){
@@ -85,7 +89,14 @@ public class Pokemon
             var boost = statBoost.boost;
 
             StatBoosts[stat] = Mathf.Clamp(StatBoosts[stat] + boost,-6,6);
-            Debug.Log($"{stat} has been boosted to {StatBoosts[stat]}");
+
+            if(boost > 0){
+                StatusChanges.Enqueue($"{basePokemon.name}'s {stat} rose!");
+            }else{
+                StatusChanges.Enqueue($"{basePokemon.name}'s {stat} fell!");
+            }
+
+            //Debug.Log($"{stat} has been boosted to {StatBoosts[stat]}");
         }
     }
 
@@ -149,6 +160,9 @@ public class Pokemon
     {
         int r = Random.Range(0, moves.Count);
         return moves[r];
+    }
+    public void OnBattleOver(){
+        ResetStatBoosts();
     }
 }
 

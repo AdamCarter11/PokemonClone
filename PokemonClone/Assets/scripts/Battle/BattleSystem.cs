@@ -154,6 +154,20 @@ public class BattleSystem : MonoBehaviour
 
             CheckForBattleOver(targetUnit);
         }
+
+        //used for status conditions (damage after the turn)
+        sourceUnit.pokemon.OnAfterTurn();
+        yield return ShowStatusChanges(sourceUnit.pokemon);
+        yield return sourceUnit.Hud.UpdateHP();
+        if (sourceUnit.pokemon.Hp <= 0)
+        {
+            yield return dialogBox.TypeDialog($"{sourceUnit.pokemon.basePokemon.name} Fainted!");
+
+            yield return new WaitForSeconds(2f);
+
+
+            CheckForBattleOver(sourceUnit);
+        }
     }
     IEnumerator RunMoveEffects(Move move, Pokemon source, Pokemon target){
         var effects = move.Base.Effects;
@@ -164,6 +178,10 @@ public class BattleSystem : MonoBehaviour
             else{
                 target.ApplyBoosts(effects.Boosts);
             }
+        }
+        if(effects.Status != ConditionID.none){
+            //move causes a status condition
+            target.SetStatus(effects.Status);
         }
         yield return ShowStatusChanges(source);
         yield return ShowStatusChanges(target);

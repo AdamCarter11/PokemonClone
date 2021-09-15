@@ -22,7 +22,9 @@ public class Pokemon
     public Dictionary<Stat,int> Stats{get; private set;}
     public Dictionary<Stat,int> StatBoosts{get; private set;} //Stat is the key, int represents the value
     //in the case of the StatBoosts dictionary, the int can be between -6 to +6 (incriments of .5)
+    public Condition status {get; private set;}
     public Queue<string> StatusChanges{ get; private set;} = new Queue<string>();
+    public bool HpChanged{get; set;}
     public void Init()
     {
         //basePokemon = pBase;
@@ -148,18 +150,27 @@ public class Pokemon
         float d = a * move.Base.Power * ((float)attack / defense) + 2;
         int damage = Mathf.FloorToInt(d * modifiers);
 
-        Hp -= damage;
-        if(Hp <= 0)
-        {
-            Hp = 0;
-            damageDetails.Fainted = true;
-        }
+        UpdateHP(damage);
         return damageDetails;
+    }
+
+    public void UpdateHP(int damage){
+        Hp = Mathf.Clamp(Hp-damage, 0, MaxHp);
+        HpChanged = true;
+    }
+
+    public void SetStatus(ConditionID conditionID){
+        status = ConditionsDB.Conditions[conditionID];
+        StatusChanges.Enqueue($"{basePokemon.name} {status.StartMessage}");
     }
     public Move SelectEnemyMove()
     {
         int r = Random.Range(0, moves.Count);
         return moves[r];
+    }
+    public void OnAfterTurn(){
+        //only calls the function if it isn't null (notice ? mark)
+        status?.OnAfterTurn?.Invoke(this);
     }
     public void OnBattleOver(){
         ResetStatBoosts();

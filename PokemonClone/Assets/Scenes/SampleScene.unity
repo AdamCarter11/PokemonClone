@@ -5060,7 +5060,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ef2b25b2b65c984bbca1bfeedfe06e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lettersPerSecond: 30
+  lettersPerSecond: 45
   highlightedColor: {r: 0.39348632, g: 0.8490566, b: 0.18823424, a: 1}
   dialogText: {fileID: 169463668}
   actionSelector: {fileID: 1098931485}
@@ -5775,6 +5775,8 @@ MonoBehaviour:
     level: 7
   - _base: {fileID: 11400000, guid: 525ca9f8e3919d349b6e379a6d57b0ae, type: 2}
     level: 5
+  - _base: {fileID: 11400000, guid: 525ca9f8e3919d349b6e379a6d57b0ae, type: 2}
+    level: 15
 --- !u!1 &1611751496
 GameObject:
   m_ObjectHideFlags: 0
